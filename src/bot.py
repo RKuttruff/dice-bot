@@ -11,7 +11,10 @@ bot = commands.Bot(command_prefix='!')
 
 @bot.event
 async def on_ready():
-	print(f'{bot.user.name} has connected to Discord!')
+	print(
+        f'{client.user} is connected to the following guild:\n'
+        f'{guild.name}(id: {guild.id})'
+    )
 
 @bot.command(name='roll_dice', help='Rolls dice with the numbers of faces given several die can be rolled in one command')
 async def roll_die(ctx, *args):
