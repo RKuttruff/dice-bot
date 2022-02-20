@@ -4,6 +4,8 @@ import random
 from discord.ext import commands
 from dotenv import load_dotenv
 
+from loguru import logger
+
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
