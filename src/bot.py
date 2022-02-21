@@ -1,12 +1,9 @@
-import os
-import sys
-import random
+import os, sys, random
 
 from threading import Thread
 
 from discord.ext import commands
 from dotenv import load_dotenv
-
 from loguru import logger
 
 load_dotenv()
