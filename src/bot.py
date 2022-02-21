@@ -36,12 +36,12 @@ def err(msg):
 # Function to read in aliases from statefile.
 # Currently a placeholder
 def init():
-	print('init')
+	info('init')
 
 # Function to write out aliases to statefile.
 # Currently a placeholder
 def stateWrite():
-	print('stateWrite')
+	info('stateWrite')
 
 @logger.catch
 def usrInput():
@@ -49,6 +49,7 @@ def usrInput():
 		cmd = input(":")
 		if cmd.lower() == 'quit':
 			info("Quit command recieved: exiting")
+			stateWrite()
 			os._exit(0) 	# Is this the best way? sys.exit doesn't work cause not main thread...
 
 thread = Thread(target=usrInput)
@@ -56,9 +57,12 @@ thread = Thread(target=usrInput)
 @logger.catch
 @bot.event
 async def on_ready():
-	info(f'{bot.user} is connected to the following guild(s):\n')
+	logstr = f'{bot.user} is connected to the following guild(s):\n'
 	for guild in bot.guilds:
-		info(f'\t-{guild.name}(id: {guild.id})')
+		logstr += f'\t-{guild.name}(id: {guild.id})'
+	
+	info(logstr)
+	
 	thread.start()
 
 
@@ -79,13 +83,15 @@ async def roll_die(ctx, *args):
 #		print(s.split())
 		await ctx.send('You rolled: ' + ', '.join(s.split()) + '; total = ' + str(total))
  
+@logger.catch
 @bot.command(name='alias', help='Assign, remove and manage aliases')
 async def alias(ctx, *args):
-	print('alias command called')
+	info('alias command called')
 
+@logger.catch
 @bot.command(name='roll', help='Roll a set of dice defined by a given alias')
 async def roll(ctx, alias):
-	print('roll command called')
+	info('roll command called')
 
 init()
 
