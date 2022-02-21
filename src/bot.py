@@ -19,6 +19,8 @@ def fine(msg):
 	
 def err(msg)
 	logger.error(msg)
+
+@logger.catch
 def usrInput():
 	while True:
 		cmd = input(":")
@@ -27,6 +29,7 @@ def usrInput():
 
 thread = Thread(target=usrInput)
 
+@logger.catch
 @bot.event
 async def on_ready():
 	print(f'{bot.user} is connected to the following guild:\n')
@@ -34,6 +37,7 @@ async def on_ready():
 		print(f'{guild.name}(id: {guild.id})')
 	thread.start()
 
+@logger.catch
 @bot.command(name='roll_dice', help='Rolls dice with the numbers of faces given several die can be rolled in one command')
 async def roll_die(ctx, *args):
 	total = 0
@@ -50,6 +54,7 @@ async def roll_die(ctx, *args):
 #		print(s.split())
 		await ctx.send('You rolled: ' + ', '.join(s.split()) + '; total = ' + str(total))
 		
-
-bot.run(TOKEN)
-	
+try:
+	bot.run(TOKEN)
+except Exception as e:
+	logger.exception(e)
