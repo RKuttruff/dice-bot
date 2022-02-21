@@ -12,6 +12,15 @@ from loguru import logger
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
+def errfilter(r):
+	return r["level"].name == "ERROR" or r["level"].name == "CRITICAL"
+	
+def errfiltercomp(r):
+	return r["level"].name != "ERROR" and r["level"].name != "CRITICAL"
+
+logger.add("dicebot_out_{time}.log", rotation="10 MB", filter=errfiltercomp, compression="gz")
+logger.add("dicebot_err_{time}.log", rotation="10 MB", filter=errfilter, compression="gz")
+
 bot = commands.Bot(command_prefix='!')
 
 def fine(msg):
