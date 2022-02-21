@@ -36,6 +36,7 @@ def usrInput():
 	while True:
 		cmd = input(":")
 		if cmd.lower() == 'quit':
+			info("Quit command recieved: exiting")
 			os._exit(0) 	# Is this the best way? sys.exit doesn't work cause not main thread...
 
 thread = Thread(target=usrInput)
@@ -43,9 +44,9 @@ thread = Thread(target=usrInput)
 @logger.catch
 @bot.event
 async def on_ready():
-	print(f'{bot.user} is connected to the following guild:\n')
+	info(f'{bot.user} is connected to the following guild(s):\n')
 	for guild in bot.guilds:
-		print(f'{guild.name}(id: {guild.id})')
+		info(f'\t-{guild.name}(id: {guild.id})')
 	thread.start()
 
 @logger.catch
@@ -64,6 +65,8 @@ async def roll_die(ctx, *args):
 	if valid:
 #		print(s.split())
 		await ctx.send('You rolled: ' + ', '.join(s.split()) + '; total = ' + str(total))
+		
+info("Running bot!")
 		
 try:
 	bot.run(TOKEN)
