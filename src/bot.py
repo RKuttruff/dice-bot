@@ -26,7 +26,7 @@ bot = commands.Bot(command_prefix='!')
 def fine(msg):
 	logger.fine(msg)
 	
-def err(msg)
+def err(msg):
 	logger.error(msg)
 
 @logger.catch
