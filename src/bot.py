@@ -21,6 +21,8 @@ def errfiltercomp(r):
 logger.add("dicebot_out_{time}.log", rotation="10 MB", filter=errfiltercomp, compression="gz")
 logger.add("dicebot_err_{time}.log", rotation="10 MB", filter=errfilter, compression="gz")
 
+logger.remove(0)
+
 bot = commands.Bot(command_prefix='!')
 
 def info(msg):
