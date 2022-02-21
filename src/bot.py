@@ -81,7 +81,7 @@ async def roll_die(ctx, *args):
 
 	if valid:
 #		print(s.split())
-		await ctx.send('You rolled: ' + ', '.join(s.split()) + '; total = ' + str(total))
+		await ctx.reply('You rolled: ' + ', '.join(s.split()) + '; total = ' + str(total))
  
 @logger.catch
 @bot.command(name='alias', help='Assign, remove and manage aliases')
