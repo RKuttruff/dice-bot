@@ -23,8 +23,8 @@ logger.add("dicebot_err_{time}.log", rotation="10 MB", filter=errfilter, compres
 
 bot = commands.Bot(command_prefix='!')
 
-def fine(msg):
-	logger.fine(msg)
+def info(msg):
+	logger.info(msg)
 	
 def err(msg):
 	logger.error(msg)
