@@ -14,6 +14,11 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 
 bot = commands.Bot(command_prefix='!')
 
+def fine(msg):
+	logger.fine(msg)
+	
+def err(msg)
+	logger.error(msg)
 def usrInput():
 	while True:
 		cmd = input(":")
