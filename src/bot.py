@@ -31,6 +31,6 @@ async def roll_die(ctx, *args):
 #		print(s.split())
 		await ctx.send('You rolled: ' + ', '.join(s.split()) + '; total = ' + str(total))
 	else:
-		await.ctx.send('Invalid use of !roll_dice command! Please follow the command with a list of numbers (integers) greater than 0.')
+		await ctx.send('Invalid use of !roll_dice command! Please follow the command with a list of numbers (integers) greater than 0.')
 
 bot.run(TOKEN)
