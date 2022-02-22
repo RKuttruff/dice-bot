@@ -8,7 +8,7 @@
 #
 #	You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os, sys, random
+import os, sys, random, json, zipfile
 
 from threading import Thread
 
@@ -43,12 +43,19 @@ def err(msg):
 # Function to read in aliases from statefile.
 # Currently a placeholder
 def init():
-	info('init')
+	info('reading aliases from aliases.json')
+	f = open("aliases.json", "r")
+	aliases = json.loads(f.read())
 
 # Function to write out aliases to statefile.
 # Currently a placeholder
 def stateWrite():
-	info('stateWrite')
+	info('serializing alias dict to json')
+	aliasStr = json.dumps(aliases)
+	info('writing to aliases.json')
+	f = open("aliases.json", "w")
+	f.write(aliasStr)
+	f.close()
 
 @logger.catch
 def usrInput():
