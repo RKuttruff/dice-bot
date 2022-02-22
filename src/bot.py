@@ -103,12 +103,18 @@ async def roll(ctx, alias):
 @logger.catch
 @bot.event
 async def on_guild_join(g):
-	pass
+	info(f'Bot has joined guild: {g.name}(id: {g.id})')
 	
 @logger.catch
 @bot.event
 async def on_guild_remove(g):
-	pass
+	info(f'Bot has left guild: {g.name}(id: {g.id})')
+	if g.id in aliases.keys():
+		del aliases[g.id]
+		stateWrite()
+		info('aliases removed')
+	else:
+		info('No aliases from the leaving guild to remove')
 
 init()
 
