@@ -130,7 +130,7 @@ async def on_guild_remove(g):
 
 init()
 
-info("Running bot!")
+info("Running bot! Beep Boop!")
 		
 try:
 	bot.run(TOKEN)
