@@ -99,6 +99,16 @@ async def alias(ctx, *args):
 @bot.command(name='roll', help='Roll a set of dice defined by a given alias')
 async def roll(ctx, alias):
 	info('roll command called')
+	
+@logger.catch
+@bot.event
+async def on_guild_join(g):
+	pass
+	
+@logger.catch
+@bot.event
+async def on_guild_remove(g):
+	pass
 
 init()
 
