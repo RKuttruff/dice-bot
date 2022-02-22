@@ -53,9 +53,14 @@ def stateWrite():
 	info('serializing alias dict to json')
 	aliasStr = json.dumps(aliases)
 	info('writing to aliases.json')
-	f = open("aliases.json", "w")
-	f.write(aliasStr)
-	f.close()
+	try:
+		f = open("aliases.json", "w")
+		f.write(aliasStr)
+		f.close()
+	except:
+		err('State output failed!')
+		err('Emergency alias dump: ')
+		err(aliasStr)
 
 @logger.catch
 def usrInput():
