@@ -106,6 +106,16 @@ async def roll_die(ctx, *args):
 @bot.command(name='alias', help='Assign, remove and manage aliases')
 async def alias(ctx, *args):
 	info('alias command called')
+	
+	try:
+		args = list(args)
+		
+		if len(args) > 0:
+			subcmd = args.pop(0)
+		else:
+			await ctx.reply("You must provide an argument! See !help for more")
+	except Exception as e:
+		logger.exception(e)
 
 @logger.catch
 @bot.command(name='roll', help='Roll a set of dice defined by a given alias')
