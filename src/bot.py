@@ -73,6 +73,9 @@ def usrInput():
 
 thread = Thread(target=usrInput)
 
+def guildHasAliases(guild):
+	return guild.id in aliases.keys()
+	
 @logger.catch
 @bot.event
 async def on_ready():
