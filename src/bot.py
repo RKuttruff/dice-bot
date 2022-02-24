@@ -134,7 +134,7 @@ async def on_guild_join(g):
 @bot.event
 async def on_guild_remove(g):
 	info(f'Bot has left guild: {g.name}(id: {g.id})')
-	if g.id in aliases.keys():
+	if guildHasAliases(g):
 		del aliases[g.id]
 		stateWrite()
 		info('aliases removed')
