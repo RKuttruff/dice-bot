@@ -120,7 +120,22 @@ async def alias(ctx, *args):
 			if subcmd == 'add':
 				pass
 			elif subcmd == 'remove':
-				pass
+				if guildHasAliases(gid):
+					guildAliases = aliases[gid]
+				
+					if len(args) > 0:
+						total = len(args)
+						removed = 0
+						for alias in args:
+							if alias.lower() in guildAliases.keys():
+								del guildAliases[alias]
+								removed++
+						await ctx.reply(f'Removed {removed} alias(es) out of {total} provided')
+						info(f'Removed {removed} alias(es) out of {total} provided from guild id: {gid}')
+					else:
+						await ctx.reply("You need to provide an alias (or aliases to remove)")
+				else:
+					await ctx.reply("The current guild has no aliases to remove")
 			elif subcmd == 'list':
 				pass
 			elif subcmd == 'purge':
