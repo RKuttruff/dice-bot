@@ -114,7 +114,18 @@ async def alias(ctx, *args):
 		args = list(args)
 		
 		if len(args) > 0:
-			subcmd = args.pop(0)
+			subcmd = args.pop(0).lower()
+			
+			if subcmd == 'add':
+				pass
+			elif subcmd == 'remove':
+				pass
+			elif subcmd == 'list':
+				pass
+			elif subcmd == 'purge':
+				pass
+			else:
+				await ctx.reply("Invalid subcommand. Valid subcommands are: `add`, `remove`, `list` and `purge`")
 		else:
 			await ctx.reply("You must provide an argument! See !help for more")
 	except Exception as e:
