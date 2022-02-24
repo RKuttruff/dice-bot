@@ -115,6 +115,7 @@ async def alias(ctx, *args):
 		
 		if len(args) > 0:
 			subcmd = args.pop(0).lower()
+			gid = ctx.guild.id
 			
 			if subcmd == 'add':
 				pass
@@ -123,7 +124,6 @@ async def alias(ctx, *args):
 			elif subcmd == 'list':
 				pass
 			elif subcmd == 'purge':
-				gid = ctx.guild.id
 				if guildHasAliases(gid):
 					info(f'Purging aliases for guild {gid}')
 					del aliases[gid]
