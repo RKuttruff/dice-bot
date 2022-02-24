@@ -123,7 +123,14 @@ async def alias(ctx, *args):
 			elif subcmd == 'list':
 				pass
 			elif subcmd == 'purge':
-				pass
+				gid = ctx.guild.id
+				if guildHasAliases(gid):
+					info(f'Purging aliases for guild {gid}')
+					del aliases[gid]
+					stateWrite()
+					await ctx.reply("Aliases purged successfully")
+				else:
+					await ctx.reply("No aliases to purge")
 			else:
 				await ctx.reply("Invalid subcommand. Valid subcommands are: `add`, `remove`, `list` and `purge`")
 		else:
