@@ -108,6 +108,7 @@ async def roll_die(ctx, *args):
 	total = 0
 	valid = False
 	s = ''
+	
 	for arg in args:
 		try:
 			arg = arg.lower()
@@ -151,7 +152,7 @@ async def alias(ctx, *args):
 						arg = arg.lower()
 			
 						if (arg.isdecimal() and int(arg) > 0):
-							cmdArgs.append(int(arg))
+							cmdArgs.append(arg)
 						elif arg.startswith('op='):
 							cmdArgs.append(arg)
 						else:
@@ -227,7 +228,17 @@ async def alias(ctx, *args):
 @logger.catch
 @bot.command(name='roll', help='Roll a set of dice defined by a given alias')
 async def roll(ctx, alias):
-	info('roll command called')
+	if guildHasAliases(ctx.guild):
+		guildAliases = aliases[str(ctx.guild.id)]
+		
+		alias = alias.lower()
+		
+		if alias in guildAliases.keys():
+			await roll_die(ctx, guildAliases[alias])
+		else:
+			await ctx.reply("Alias not found!")
+	else:
+		await ctx.reply("Alias not found because this guild has no aliases!")
 	
 @logger.catch
 @bot.event
