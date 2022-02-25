@@ -8,39 +8,263 @@
 #
 #	You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os
-import random
+import os, sys, random, json, zipfile
+
+from threading import Thread
+
 
 from discord.ext import commands
 from dotenv import load_dotenv
+from loguru import logger
+
+from os.path import exists
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
+def errfilter(r):
+	return r["level"].name == "ERROR" or r["level"].name == "CRITICAL"
+	
+def errfiltercomp(r):
+	return r["level"].name != "ERROR" and r["level"].name != "CRITICAL"
+
+logger.add("dicebot_out_{time}.log", rotation="10 MB", filter=errfiltercomp, compression="gz")
+logger.add("dicebot_err_{time}.log", rotation="10 MB", filter=errfilter, compression="gz")
+
+logger.remove(0)
+
 bot = commands.Bot(command_prefix='!')
 
+aliases = {}
+
+def info(msg):
+	logger.info(msg)
+	
+def err(msg):
+	logger.error(msg)
+  
+# Function to read in aliases from statefile.
+# Currently a placeholder
+def init():
+	info('reading aliases from aliases.json')
+	
+	global aliases
+	
+	if exists("aliases.json"):
+		f = open("aliases.json", "r")
+		aliases = json.loads(f.read())
+	else:
+		logger.warning("Alias file not found! Using new, empty alias table and creating new alias file")
+		open("aliases.json", "x")
+		aliases = {}
+
+# Function to write out aliases to statefile.
+# Currently a placeholder
+def stateWrite():
+	info('serializing alias dict to json')
+	aliasStr = json.dumps(aliases)
+	info('writing to aliases.json')
+	try:
+		f = open("aliases.json", "w")
+		f.write(aliasStr)
+		f.close()
+	except:
+		err('State output failed!')
+		err('Emergency alias dump: ')
+		err(aliasStr)
+
+@logger.catch
+def usrInput():
+	while True:
+		cmd = input(":")
+		if cmd.lower() == 'quit':
+			info("Quit command recieved: exiting")
+			stateWrite()
+			os._exit(0) 	# Is this the best way? sys.exit doesn't work cause not main thread...
+
+thread = Thread(target=usrInput)
+
+def guildHasAliases(guild):
+	return str(guild.id) in aliases.keys()
+	
+def gidHasAliases(gid):
+	return str(gid) in aliases.keys()
+	
+@logger.catch
 @bot.event
 async def on_ready():
-	print(f'{bot.user} is connected to the following guild:\n')
+	logstr = f'{bot.user} is connected to the following guild(s):\n'
 	for guild in bot.guilds:
-		print(f'{guild.name}(id: {guild.id})')
+		logstr += f'\t\t\t\t-{guild.name}(id: {guild.id})'
+	
+	info(logstr)
+	
+	thread.start()
 
+
+@logger.catch
 @bot.command(name='roll_dice', help='Rolls dice with the numbers of faces given several die can be rolled in one command')
 async def roll_die(ctx, *args):
+	if len(args) == 1 and type(args[0]) == type([]):
+		args = args[0] # Alias calls will have args as a list so unpack the list from the tuple
 	total = 0
 	valid = False
 	s = ''
+	
 	for arg in args:
-		if int(arg) > 0:
-			valid = True
-			r = random.randint(1, int(arg))
-			s = s + str(r) + ' '
-			total += r
-
+		try:
+			arg = arg.lower()
+			
+			if arg.startswith('op='):
+				continue
+		
+			if int(arg) > 0:
+				valid = True
+				r = random.randint(1, int(arg))
+				s = s + str(r) + ' '
+				total += r
+		except:
+			valid = False
+			await ctx.reply('Arguments must be positive integers')
+			return
 	if valid:
 #		print(s.split())
-		await ctx.send('You rolled: ' + ', '.join(s.split()) + '; total = ' + str(total))
+		await ctx.reply('You rolled: ' + ', '.join(s.split()) + '; total = ' + str(total))
 	else:
-		await ctx.send('Invalid use of !roll_dice command! Please follow the command with a list of numbers (integers) greater than 0.')
+		await ctx.reply('Arguments must be positive integers')
 
-bot.run(TOKEN)
+@logger.catch
+@bot.command(name='alias', help='Assign, remove and manage aliases')
+async def alias(ctx, *args):
+	try:
+		args = list(args)
+		
+		if len(args) > 0:
+			subcmd = args.pop(0).lower()
+			gid = str(ctx.guild.id)
+			
+			if subcmd == 'add':
+				#verify args
+				if len(args) > 1:
+					valid = True
+					cmdArgs = []
+					aName = args.pop(0).lower()
+					
+					for arg in args:
+						arg = arg.lower()
+			
+						if (arg.isdecimal() and int(arg) > 0):
+							cmdArgs.append(arg)
+						elif arg.startswith('op='):
+							cmdArgs.append(arg)
+						else:
+							valid = False
+							break
+					
+					#make alias
+					if valid:
+						guildAliases = None
+						
+						if guildHasAliases(ctx.guild):
+							guildAliases = aliases[str(ctx.guild.id)]
+						else:
+							guildAliases = {}
+							aliases[str(ctx.guild.id)] = guildAliases
+							
+						guildAliases[aName] = cmdArgs
+						
+						stateWrite()
+						
+						await ctx.reply('Alias added successfully!')
+						info(f'Added alias {aName} = {cmdArgs} to guild {ctx.guild.name} (id: {gid})')
+					else:
+						await ctx.reply('Invalid arguments provided for roll_dice alias')
+				else:
+					await ctx.reply('Insufficient arguments provided, must have a name followed by the number(s) of dice faces to be rolled')
+			elif subcmd == 'remove':
+				if gidHasAliases(gid):
+					guildAliases = aliases[gid]
+				
+					if len(args) > 0:
+						total = len(args)
+						removed = 0
+						for alias in args:
+							if alias.lower() in guildAliases.keys():
+								del guildAliases[alias]
+								removed += 1
+								
+						stateWrite()
+						await ctx.reply(f'Removed {removed} alias(es) out of {total} provided')
+						info(f'Removed {removed} alias(es) out of {total} provided from guild: {ctx.guild.name}(id: {gid})')
+					else:
+						await ctx.reply("You need to provide an alias (or aliases to remove)")
+				else:
+					await ctx.reply("The current guild has no aliases to remove")
+			elif subcmd == 'list':
+				if gidHasAliases(gid):
+					guildAliases = aliases[gid]
+				
+					l = ''
+					
+					for alias in guildAliases.keys():
+						l += f'{alias}:\t{guildAliases[alias]}\n'
+						
+					await ctx.reply(l)
+				else:
+					await ctx.reply("The current guild has no aliases to list")
+			elif subcmd == 'purge':
+				if gidHasAliases(gid):
+					info(f'Purging aliases for guild: {ctx.guild.name}(id: {gid})')
+					del aliases[str(gid)]
+					stateWrite()
+					await ctx.reply("Aliases purged successfully")
+				else:
+					await ctx.reply("No aliases to purge")
+			else:
+				await ctx.reply("Invalid subcommand. Valid subcommands are: `add`, `remove`, `list` and `purge`")
+		else:
+			await ctx.reply("You must provide an argument! See !help for more")
+	except Exception as e:
+		logger.exception(e)
+
+@logger.catch
+@bot.command(name='roll', help='Roll a set of dice defined by a given alias')
+async def roll(ctx, alias):
+	if guildHasAliases(ctx.guild):
+		guildAliases = aliases[str(ctx.guild.id)]
+		
+		alias = alias.lower()
+		
+		if alias in guildAliases.keys():
+			await roll_die(ctx, guildAliases[alias])
+		else:
+			await ctx.reply("Alias not found!")
+	else:
+		await ctx.reply("Alias not found because this guild has no aliases!")
+	
+@logger.catch
+@bot.event
+async def on_guild_join(g):
+	info(f'Bot has joined guild: {g.name}(id: {g.id})')
+	
+@logger.catch
+@bot.event
+async def on_guild_remove(g):
+	info(f'Bot has left guild: {g.name}(id: {g.id})')
+	if guildHasAliases(g):
+		del aliases[str(g.id)]
+		stateWrite()
+		info('aliases removed')
+	else:
+		info('No aliases from the leaving guild to remove')
+
+init()
+
+info("Running bot! Beep Boop!")
+		
+try:
+	bot.run(TOKEN)
+except Exception as e:
+	logger.exception(e)
+
+
