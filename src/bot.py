@@ -46,6 +46,9 @@ def err(msg):
 # Currently a placeholder
 def init():
 	info('reading aliases from aliases.json')
+	
+	global aliases
+	
 	if exists("aliases.json"):
 		f = open("aliases.json", "r")
 		aliases = json.loads(f.read())
