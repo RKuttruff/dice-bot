@@ -45,11 +45,12 @@ def err(msg):
 # Function to read in aliases from statefile.
 # Currently a placeholder
 def init():
+	info('reading aliases from aliases.json')
 	if exists("aliases.json"):
-		info('reading aliases from aliases.json')
 		f = open("aliases.json", "r")
 		aliases = json.loads(f.read())
 	else:
+		logger.warning("Alias file not found! Using new, empty alias table and creating new alias file")
 		open("aliases.json", "x")
 		aliases = {}
 
@@ -90,7 +91,7 @@ def gidHasAliases(gid):
 async def on_ready():
 	logstr = f'{bot.user} is connected to the following guild(s):\n'
 	for guild in bot.guilds:
-		logstr += f'\t-{guild.name}(id: {guild.id})'
+		logstr += f'\t\t\t\t-{guild.name}(id: {guild.id})'
 	
 	info(logstr)
 	
@@ -129,8 +130,6 @@ async def roll_die(ctx, *args):
 @logger.catch
 @bot.command(name='alias', help='Assign, remove and manage aliases')
 async def alias(ctx, *args):
-	info('alias command called')
-	
 	try:
 		args = list(args)
 		
@@ -171,6 +170,7 @@ async def alias(ctx, *args):
 						stateWrite()
 						
 						await ctx.reply('Alias added successfully!')
+						info(f'Added alias {aName} = {cmdArgs} to guild {ctx.guild.name} (id: {gid})')
 					else:
 						await ctx.reply('Invalid arguments provided for roll_dice alias')
 				else:
@@ -189,7 +189,7 @@ async def alias(ctx, *args):
 								
 						stateWrite()
 						await ctx.reply(f'Removed {removed} alias(es) out of {total} provided')
-						info(f'Removed {removed} alias(es) out of {total} provided from guild id: {gid}')
+						info(f'Removed {removed} alias(es) out of {total} provided from guild: {ctx.guild.name}(id: {gid})')
 					else:
 						await ctx.reply("You need to provide an alias (or aliases to remove)")
 				else:
@@ -198,7 +198,7 @@ async def alias(ctx, *args):
 				pass
 			elif subcmd == 'purge':
 				if gidHasAliases(gid):
-					info(f'Purging aliases for guild {gid}')
+					info(f'Purging aliases for guild: {ctx.guild.name}(id: {gid})')
 					del aliases[gid]
 					stateWrite()
 					await ctx.reply("Aliases purged successfully")
