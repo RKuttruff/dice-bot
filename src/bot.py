@@ -195,7 +195,17 @@ async def alias(ctx, *args):
 				else:
 					await ctx.reply("The current guild has no aliases to remove")
 			elif subcmd == 'list':
-				pass
+				if gidHasAliases(gid):
+					guildAliases = aliases[gid]
+				
+					l = ''
+					
+					for alias in guildAliases.keys():
+						l += f'{alias}:\t{guildAliases[alias]}\n'
+						
+					await ctx.reply(l)
+				else:
+					await ctx.reply("The current guild has no aliases to list")
 			elif subcmd == 'purge':
 				if gidHasAliases(gid):
 					info(f'Purging aliases for guild: {ctx.guild.name}(id: {gid})')
