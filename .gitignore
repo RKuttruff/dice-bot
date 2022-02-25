@@ -133,5 +133,4 @@ dmypy.json
 
 
 
-movelogs.sh
-logs/
+logs/*.zip
