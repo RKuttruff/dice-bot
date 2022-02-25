@@ -90,10 +90,11 @@ async def on_ready():
 	
 	thread.start()
 
-
 @logger.catch
 @bot.command(name='roll_dice', help='Rolls dice with the numbers of faces given several die can be rolled in one command')
 async def roll_die(ctx, *args):
+	if len(args) == 1 and type(args[0]) == type([]):
+		args = args[0] # Alias calls will have args as a list so unpack the list from the tuple
 	total = 0
 	valid = False
 	s = ''
@@ -103,11 +104,10 @@ async def roll_die(ctx, *args):
 			r = random.randint(1, int(arg))
 			s = s + str(r) + ' '
 			total += r
-
 	if valid:
 #		print(s.split())
 		await ctx.reply('You rolled: ' + ', '.join(s.split()) + '; total = ' + str(total))
- 
+
 @logger.catch
 @bot.command(name='alias', help='Assign, remove and manage aliases')
 async def alias(ctx, *args):
