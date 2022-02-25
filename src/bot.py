@@ -24,7 +24,7 @@ TOKEN = os.getenv('DISCORD_TOKEN')
 
 def errfilter(r):
 	return r["level"].name == "ERROR" or r["level"].name == "CRITICAL"
-	
+
 def errfiltercomp(r):
 	return r["level"].name != "ERROR" and r["level"].name != "CRITICAL"
 
@@ -39,17 +39,17 @@ aliases = {}
 
 def info(msg):
 	logger.info(msg)
-	
+
 def err(msg):
 	logger.error(msg)
-  
+
 # Function to read in aliases from statefile.
 # Currently a placeholder
 def init():
 	info('reading aliases from aliases.json')
-	
+
 	global aliases
-	
+
 	if exists("aliases.json"):
 		f = open("aliases.json", "r")
 		aliases = json.loads(f.read())
@@ -86,21 +86,20 @@ thread = Thread(target=usrInput)
 
 def guildHasAliases(guild):
 	return str(guild.id) in aliases.keys()
-	
+
 def gidHasAliases(gid):
 	return str(gid) in aliases.keys()
-	
+
 @logger.catch
 @bot.event
 async def on_ready():
 	logstr = f'{bot.user} is connected to the following guild(s):\n'
 	for guild in bot.guilds:
 		logstr += f'\t\t\t\t-{guild.name}(id: {guild.id})'
-	
-	info(logstr)
-	
-	thread.start()
 
+	info(logstr)
+
+	thread.start()
 
 @logger.catch
 @bot.command(name='roll_dice', help='Rolls dice with the numbers of faces given several die can be rolled in one command')
@@ -110,14 +109,14 @@ async def roll_die(ctx, *args):
 	total = 0
 	valid = False
 	s = ''
-	
+
 	for arg in args:
 		try:
 			arg = arg.lower()
-			
+
 			if arg.startswith('op='):
 				continue
-		
+
 			if int(arg) > 0:
 				valid = True
 				r = random.randint(1, int(arg))
@@ -138,21 +137,21 @@ async def roll_die(ctx, *args):
 async def alias(ctx, *args):
 	try:
 		args = list(args)
-		
+
 		if len(args) > 0:
 			subcmd = args.pop(0).lower()
 			gid = str(ctx.guild.id)
-			
+
 			if subcmd == 'add':
 				#verify args
 				if len(args) > 1:
 					valid = True
 					cmdArgs = []
 					aName = args.pop(0).lower()
-					
+
 					for arg in args:
 						arg = arg.lower()
-			
+
 						if (arg.isdecimal() and int(arg) > 0):
 							cmdArgs.append(arg)
 						elif arg.startswith('op='):
@@ -160,21 +159,21 @@ async def alias(ctx, *args):
 						else:
 							valid = False
 							break
-					
+
 					#make alias
 					if valid:
 						guildAliases = None
-						
+
 						if guildHasAliases(ctx.guild):
 							guildAliases = aliases[str(ctx.guild.id)]
 						else:
 							guildAliases = {}
 							aliases[str(ctx.guild.id)] = guildAliases
-							
+
 						guildAliases[aName] = cmdArgs
-						
+
 						stateWrite()
-						
+
 						await ctx.reply('Alias added successfully!')
 						info(f'Added alias {aName} = {cmdArgs} to guild {ctx.guild.name} (id: {gid})')
 					else:
@@ -184,7 +183,7 @@ async def alias(ctx, *args):
 			elif subcmd == 'remove':
 				if gidHasAliases(gid):
 					guildAliases = aliases[gid]
-				
+
 					if len(args) > 0:
 						total = len(args)
 						removed = 0
@@ -192,7 +191,7 @@ async def alias(ctx, *args):
 							if alias.lower() in guildAliases.keys():
 								del guildAliases[alias]
 								removed += 1
-								
+
 						stateWrite()
 						await ctx.reply(f'Removed {removed} alias(es) out of {total} provided')
 						info(f'Removed {removed} alias(es) out of {total} provided from guild: {ctx.guild.name}(id: {gid})')
@@ -203,12 +202,12 @@ async def alias(ctx, *args):
 			elif subcmd == 'list':
 				if gidHasAliases(gid):
 					guildAliases = aliases[gid]
-				
+
 					l = ''
-					
+
 					for alias in guildAliases.keys():
 						l += f'{alias}:\t{guildAliases[alias]}\n'
-						
+
 					await ctx.reply(l)
 				else:
 					await ctx.reply("The current guild has no aliases to list")
@@ -232,21 +231,21 @@ async def alias(ctx, *args):
 async def roll(ctx, alias):
 	if guildHasAliases(ctx.guild):
 		guildAliases = aliases[str(ctx.guild.id)]
-		
+
 		alias = alias.lower()
-		
+
 		if alias in guildAliases.keys():
 			await roll_die(ctx, guildAliases[alias])
 		else:
 			await ctx.reply("Alias not found!")
 	else:
 		await ctx.reply("Alias not found because this guild has no aliases!")
-	
+
 @logger.catch
 @bot.event
 async def on_guild_join(g):
 	info(f'Bot has joined guild: {g.name}(id: {g.id})')
-	
+
 @logger.catch
 @bot.event
 async def on_guild_remove(g):
@@ -261,10 +260,8 @@ async def on_guild_remove(g):
 init()
 
 info("Running bot! Beep Boop!")
-		
+
 try:
 	bot.run(TOKEN)
 except Exception as e:
 	logger.exception(e)
-
-
