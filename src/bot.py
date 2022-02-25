@@ -16,6 +16,8 @@ from discord.ext import commands
 from dotenv import load_dotenv
 from loguru import logger
 
+from os.path import exists
+
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
 
@@ -43,9 +45,13 @@ def err(msg):
 # Function to read in aliases from statefile.
 # Currently a placeholder
 def init():
-	info('reading aliases from aliases.json')
-	f = open("aliases.json", "r")
-	aliases = json.loads(f.read())
+	if exists("aliases.json"):
+		info('reading aliases from aliases.json')
+		f = open("aliases.json", "r")
+		aliases = json.loads(f.read())
+	else:
+		open("aliases.json", "x")
+		aliases = {}
 
 # Function to write out aliases to statefile.
 # Currently a placeholder
