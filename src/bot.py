@@ -81,10 +81,10 @@ def usrInput():
 thread = Thread(target=usrInput)
 
 def guildHasAliases(guild):
-	return guild.id in aliases.keys()
+	return str(guild.id) in aliases.keys()
 	
 def gidHasAliases(gid):
-	return gid in aliases.keys()
+	return str(gid) in aliases.keys()
 	
 @logger.catch
 @bot.event
@@ -135,7 +135,7 @@ async def alias(ctx, *args):
 		
 		if len(args) > 0:
 			subcmd = args.pop(0).lower()
-			gid = ctx.guild.id
+			gid = str(ctx.guild.id)
 			
 			if subcmd == 'add':
 				#verify args
@@ -160,10 +160,10 @@ async def alias(ctx, *args):
 						guildAliases = None
 						
 						if guildHasAliases(ctx.guild):
-							guildAliases = aliases[ctx.guild.id]
+							guildAliases = aliases[str(ctx.guild.id)]
 						else:
 							guildAliases = {}
-							aliases[ctx.guild.id] = guildAliases
+							aliases[str(ctx.guild.id)] = guildAliases
 							
 						guildAliases[aName] = cmdArgs
 						
@@ -209,7 +209,7 @@ async def alias(ctx, *args):
 			elif subcmd == 'purge':
 				if gidHasAliases(gid):
 					info(f'Purging aliases for guild: {ctx.guild.name}(id: {gid})')
-					del aliases[gid]
+					del aliases[str(gid)]
 					stateWrite()
 					await ctx.reply("Aliases purged successfully")
 				else:
@@ -236,7 +236,7 @@ async def on_guild_join(g):
 async def on_guild_remove(g):
 	info(f'Bot has left guild: {g.name}(id: {g.id})')
 	if guildHasAliases(g):
-		del aliases[g.id]
+		del aliases[str(g.id)]
 		stateWrite()
 		info('aliases removed')
 	else:
