@@ -133,7 +133,42 @@ async def alias(ctx, *args):
 			gid = ctx.guild.id
 			
 			if subcmd == 'add':
-				pass
+				#verify args
+				if len(args) > 1:
+					valid = True
+					cmdArgs = []
+					aName = args.pop(0).lower()
+					
+					for arg in args:
+						arg = arg.lower()
+			
+						if (arg.isdecimal() and int(arg) > 0):
+							cmdArgs.append(int(arg))
+						elif arg.startswith('op='):
+							cmdArgs.append(arg)
+						else:
+							valid = False
+							break
+					
+					#make alias
+					if valid:
+						guildAliases = None
+						
+						if guildHasAliases(ctx.guild):
+							guildAliases = aliases[ctx.guild.id]
+						else:
+							guildAliases = {}
+							aliases[ctx.guild.id] = guildAliases
+							
+						guildAliases[aName] = cmdArgs
+						
+						stateWrite()
+						
+						await ctx.reply('Alias added successfully!')
+					else:
+						await ctx.reply('Invalid arguments provided for roll_dice alias')
+				else:
+					await ctx.reply('Insufficient arguments provided, must have a name followed by the number(s) of dice faces to be rolled')
 			elif subcmd == 'remove':
 				if gidHasAliases(gid):
 					guildAliases = aliases[gid]
