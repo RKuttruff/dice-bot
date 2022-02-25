@@ -12,6 +12,7 @@ import os, sys, random, json, zipfile
 
 from threading import Thread
 
+
 from discord.ext import commands
 from dotenv import load_dotenv
 from loguru import logger
@@ -99,6 +100,7 @@ async def on_ready():
 	info(logstr)
 	
 	thread.start()
+
 
 @logger.catch
 @bot.command(name='roll_dice', help='Rolls dice with the numbers of faces given several die can be rolled in one command')
@@ -264,4 +266,5 @@ try:
 	bot.run(TOKEN)
 except Exception as e:
 	logger.exception(e)
+
 
