@@ -98,7 +98,7 @@ async def roll_die(ctx, *args):
 	total = 0
 	valid = False
 	s = ''
-	for arg in args:'
+	for arg in args:
 		try:
 			arg = arg.lower()
 			
