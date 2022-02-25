@@ -76,6 +76,9 @@ thread = Thread(target=usrInput)
 def guildHasAliases(guild):
 	return guild.id in aliases.keys()
 	
+def gidHasAliases(gid):
+	return gid in aliases.keys()
+	
 @logger.catch
 @bot.event
 async def on_ready():
@@ -120,7 +123,7 @@ async def alias(ctx, *args):
 			if subcmd == 'add':
 				pass
 			elif subcmd == 'remove':
-				if guildHasAliases(gid):
+				if gidHasAliases(gid):
 					guildAliases = aliases[gid]
 				
 					if len(args) > 0:
@@ -139,7 +142,7 @@ async def alias(ctx, *args):
 			elif subcmd == 'list':
 				pass
 			elif subcmd == 'purge':
-				if guildHasAliases(gid):
+				if gidHasAliases(gid):
 					info(f'Purging aliases for guild {gid}')
 					del aliases[gid]
 					stateWrite()
