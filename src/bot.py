@@ -180,6 +180,8 @@ async def alias(ctx, *args):
 							if alias.lower() in guildAliases.keys():
 								del guildAliases[alias]
 								removed += 1
+								
+						stateWrite()
 						await ctx.reply(f'Removed {removed} alias(es) out of {total} provided')
 						info(f'Removed {removed} alias(es) out of {total} provided from guild id: {gid}')
 					else:
