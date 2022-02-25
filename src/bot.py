@@ -98,15 +98,26 @@ async def roll_die(ctx, *args):
 	total = 0
 	valid = False
 	s = ''
-	for arg in args:
-		if int(arg) > 0:
-			valid = True
-			r = random.randint(1, int(arg))
-			s = s + str(r) + ' '
-			total += r
+	for arg in args:'
+		try:
+			arg = arg.lower()
+			
+			if arg.startswith('op='):
+				continue
+		
+			if int(arg) > 0:
+				valid = True
+				r = random.randint(1, int(arg))
+				s = s + str(r) + ' '
+				total += r
+		except:
+			valid = False
+			await ctx.reply('Arguments must be positive integers')
 	if valid:
 #		print(s.split())
 		await ctx.reply('You rolled: ' + ', '.join(s.split()) + '; total = ' + str(total))
+	else:
+		await ctx.reply('Arguments must be positive integers')
 
 @logger.catch
 @bot.command(name='alias', help='Assign, remove and manage aliases')
