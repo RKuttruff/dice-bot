@@ -113,6 +113,7 @@ async def roll_die(ctx, *args):
 		except:
 			valid = False
 			await ctx.reply('Arguments must be positive integers')
+			return
 	if valid:
 #		print(s.split())
 		await ctx.reply('You rolled: ' + ', '.join(s.split()) + '; total = ' + str(total))
