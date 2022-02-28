@@ -118,6 +118,10 @@ def usrInputServer():
 						conn.close()
 						info(f'Connection to {addrFmt(addr)} closed.')
 						os._exit(0) 	# Is this the best way? sys.exit doesn't work cause not main thread...
+					elif data == "exit" or data == 'disconnect':
+						info('Client disconnected, closing connection but keeping bot running...')
+						conn.close()
+						break
 					else:
 						logger.warning(f'Unknown command received from {addrFmt(addr)}. Command: {data}')
 						conn.sendall(b'Unknown command!\r\n')
