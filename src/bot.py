@@ -108,6 +108,9 @@ def usrInputServer():
 					
 					data = data.decode("utf-8").lower().strip(" \t\r\n")
 					
+					if(len(data) == 0):
+						continue
+					
 					if data == 'quit':
 						info(f'Received quit command from {addrFmt(addr)}. Quitting...')
 						stateWrite()
@@ -117,7 +120,7 @@ def usrInputServer():
 						os._exit(0) 	# Is this the best way? sys.exit doesn't work cause not main thread...
 					else:
 						logger.warning(f'Unknown command received from {addrFmt(addr)}. Command: {data}')
-						conn.sendall(b'Unknown command!\n')
+						conn.sendall(b'Unknown command!\r\n')
 				
 				info(f'Connection to {addrFmt(addr)} closed.')
 
