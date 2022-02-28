@@ -83,6 +83,7 @@ def usrInput():
 		if cmd.lower() == 'quit':
 			info("Quit command received: exiting")
 			stateWrite()
+			print()
 			os._exit(0) 	# Is this the best way? sys.exit doesn't work cause not main thread...
 			
 def addrFmt(addr):
@@ -117,6 +118,7 @@ def usrInputServer():
 						conn.sendall(b'Quit command received, exiting...')
 						conn.close()
 						info(f'Connection to {addrFmt(addr)} closed.')
+						print()
 						os._exit(0) 	# Is this the best way? sys.exit doesn't work cause not main thread...
 					elif data == "exit" or data == 'disconnect':
 						info('Client disconnected, closing connection but keeping bot running...')
