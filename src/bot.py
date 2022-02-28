@@ -8,7 +8,7 @@
 #
 #	You should have received a copy of the GNU General Public License along with this program.  If not, see <https://www.gnu.org/licenses/>.
 
-import os, sys, random, json, zipfile
+import os, sys, random, json, zipfile, socket
 
 from threading import Thread
 
@@ -21,6 +21,9 @@ from os.path import exists
 
 load_dotenv()
 TOKEN = os.getenv('DISCORD_TOKEN')
+
+HOST = "127.0.0.1"  # Loopback
+PORT = 51963  # Picked a random port not assigned to anything else by IANA
 
 def errfilter(r):
 	return r["level"].name == "ERROR" or r["level"].name == "CRITICAL"
@@ -78,11 +81,57 @@ def usrInput():
 	while True:
 		cmd = input(":")
 		if cmd.lower() == 'quit':
-			info("Quit command recieved: exiting")
+			info("Quit command received: exiting")
 			stateWrite()
 			os._exit(0) 	# Is this the best way? sys.exit doesn't work cause not main thread...
+			
+def addrFmt(addr):
+	if ':' in addr[0]:
+		return f'[{addr[0]}]:{addr[1]}'
+	else:
+		return f'{addr[0]}:{addr[1]}'
+			
+@logger.catch
+def usrInputServer():
+	while True:
+		with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+			s.bind((HOST, PORT))
+			s.listen()
+			conn, addr = s.accept()
+			with conn:
+				info(f"Connected to {addrFmt(addr)}")
+				while True:
+					conn.sendall(b':')
+					data = conn.recv(1024)
+					if not data:
+						break
+					
+					data = data.decode("utf-8").lower().strip(" \t\r\n")
+					
+					if(len(data) == 0):
+						continue
+					
+					if data == 'quit':
+						info(f'Received quit command from {addrFmt(addr)}. Quitting...')
+						stateWrite()
+						conn.sendall(b'Quit command received, exiting...')
+						conn.close()
+						info(f'Connection to {addrFmt(addr)} closed.')
+						os._exit(0) 	# Is this the best way? sys.exit doesn't work cause not main thread...
+					elif data == "exit" or data == 'disconnect':
+						info('Client disconnected, closing connection but keeping bot running...')
+						conn.close()
+						break
+					elif data == 'help':
+						conn.sendall(b'Commands:\r\n\r\n  quit:\r\n\tStops the bot and disconnects the terminal\r\n\r\n  exit:\r\n  disconnect:\r\n\tDisconnects the terminal but keeps bot running in background\r\n\r\n  help:\r\n\t displays this message\r\n')
+					else:
+						logger.warning(f'Unknown command received from {addrFmt(addr)}. Command: {data}')
+						conn.sendall(b'Unknown command! Type \'help\' for commands\r\n')
+				
+				info(f'Connection to {addrFmt(addr)} closed.')
 
-thread = Thread(target=usrInput)
+local  = Thread(target=usrInput, daemon=True)
+server = Thread(target=usrInputServer, daemon=True)
 
 def guildHasAliases(guild):
 	return str(guild.id) in aliases.keys()
@@ -99,7 +148,11 @@ async def on_ready():
 
 	info(logstr)
 
-	thread.start()
+	if not local.is_alive():
+		local.start()
+		
+	if not server.is_alive():
+		server.start()
 
 @logger.catch
 @bot.command(name='roll_dice', help='Rolls dice with the numbers of faces given several die can be rolled in one command')

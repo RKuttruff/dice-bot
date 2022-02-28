@@ -134,3 +134,5 @@ dmypy.json
 
 aliases.json
 logs/*.zip
+
+test/
