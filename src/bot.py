@@ -108,27 +108,59 @@ async def roll_die(ctx, *args):
 		args = args[0] # Alias calls will have args as a list so unpack the list from the tuple
 	total = 0
 	valid = False
-	s = ''
+	badOps = False
+	values = []
+	ops = []
+	opString = None
+	errString = 'Ignored invalid operations:'
 
 	for arg in args:
 		try:
 			arg = arg.lower()
 
 			if arg.startswith('op='):
+				opargs = arg.split('=', 1)[1].split(",")
+				
+				for oparg in opargs:
+					if oparg in ['sum', 'min', 'max', 'avg']:
+						ops.append(oparg)
+					else:
+						errString += (' ' + oparg)
+						badOps = True
+						
 				continue
 
 			if int(arg) > 0:
 				valid = True
 				r = random.randint(1, int(arg))
-				s = s + str(r) + ' '
+				values.append(r)
 				total += r
 		except:
 			valid = False
 			await ctx.reply('Arguments must be positive integers')
 			return
 	if valid:
-#		print(s.split())
-		await ctx.reply('You rolled: ' + ', '.join(s.split()) + '; total = ' + str(total))
+		output = 'You rolled: ' + ', '.join(str(e) for e in values)
+		
+		if len(ops) > 0:
+			opString = []
+			
+			for op in ops:
+				if op == 'sum':
+					opString.append('Total = ' + str(sum(values)))
+				elif op == 'max':
+					opString.append('Max = ' + str(max(values)))
+				elif op == 'min':
+					opString.append('Min = ' + str(min(values)))
+				elif op == 'avg':
+					opString.append('Average = ' + str(sum(values) / len(values)))
+			
+			output += '\n' + ', '.join(opString)
+			
+		if badOps:
+			output += f'\n{errString}'
+		
+		await ctx.reply(output)
 	else:
 		await ctx.reply('Arguments must be positive integers')
 
