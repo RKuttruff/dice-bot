@@ -122,9 +122,11 @@ def usrInputServer():
 						info('Client disconnected, closing connection but keeping bot running...')
 						conn.close()
 						break
+					elif data == 'help':
+						conn.sendall(b'Commands:\r\n\r\n  quit:\r\n\tStops the bot and disconnects the terminal\r\n\r\n  exit:\r\n  disconnect:\r\n\tDisconnects the terminal but keeps bot running in background\r\n\r\n  help:\r\n\t displays this message\r\n')
 					else:
 						logger.warning(f'Unknown command received from {addrFmt(addr)}. Command: {data}')
-						conn.sendall(b'Unknown command!\r\n')
+						conn.sendall(b'Unknown command! Type \'help\' for commands\r\n')
 				
 				info(f'Connection to {addrFmt(addr)} closed.')
 
