@@ -106,7 +106,6 @@ async def on_ready():
 async def roll_die(ctx, *args):
 	if len(args) == 1 and type(args[0]) == type([]):
 		args = args[0] # Alias calls will have args as a list so unpack the list from the tuple
-	total = 0
 	valid = False
 	badOps = False
 	values = []
@@ -134,7 +133,6 @@ async def roll_die(ctx, *args):
 				valid = True
 				r = random.randint(1, int(arg))
 				values.append(r)
-				total += r
 		except:
 			valid = False
 			await ctx.reply('Arguments must be positive integers')
